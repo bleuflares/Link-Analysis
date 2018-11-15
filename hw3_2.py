@@ -1,6 +1,6 @@
+import re
 import sys
-import numpy as np
-import math
+from pyspark import SparkConf, SparkContext
 
 def col_parser(line):
     points = line.split()
@@ -32,32 +32,25 @@ def teleport(pair):
 if __name__ == "__main__":
 
     BETA = 0.9
-    arr = [(i, 1) for i in range(1000)]
+    arr = [(i, 0, 0.001) for i in range(1000)]
 
     conf = SparkConf()
     sc = SparkContext(conf=conf)
     lines = sc.textFile(sys.argv[1])
-    """
-    
-    col_edges = lines.map(lambda line: col_parser(line)) #map to generate pair for each line
-    cols = col_edges.reduceByKey(lambda a, b: a + b)
-    """
 
-    edges = lines.map(lambda line: parser(line))
-
-    col_edges = lines.map(lambda line: col_parser(line)) #map to generate pair for each line
-    col_count = row_edges.countByKey()
+    edges = lines.map(lambda line: parser(line)).distinct()
+    col_count = sc.parallelize(edges.countByKey())
     mat = edges.join(col_count)
-    norm_mat = mat.flatmap(normalize)
-    v = sc.parllelize(arr)
+    norm_mat = mat.flatMap(normalize)
+    v = sc.parallelize(arr)
     v_old = v
 
-    while(1):
-        matmul = norm_mat.cartesian(v_old).filter(lambda x: x[0][0] == x[1][1] and x[0][1] == x[1][0]).map(lambda x: (x[0][0], BETA * x[0][2] * x[1][2])).reduceByKey(lambda a, b: a + b)
+    for j in range(50):
+        matmuls = norm_mat.cartesian(v_old).filter(lambda x: x[0][1] == x[1][0])
+        matmul = matmuls.map(lambda x: (x[0][0], BETA * x[0][2] * x[1][2])).reduceByKey(lambda a, b: a + b)
         v_new = matmul.map(teleport)
-        if(v_new == v_old):
-	       break
-        else:
-            v_old = v_new
+        v_old = v_new
 
-    print(sorted(v_old.collect())[-5:])
+    print(sorted(v_old.collect())[-10:])
+
+
