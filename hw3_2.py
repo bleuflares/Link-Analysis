@@ -41,7 +41,7 @@ if __name__ == "__main__":
     v_old = v
     v_old_pair = v_old.map(mapper)
 
-    for j in range(4):
+    for j in range(50):
         matmul_pair = norm_mat_pair.join(v_old_pair)
         print(matmul_pair.collect())
         matmul = matmul_pair.map(lambda x: (x[1][0][0], BETA * x[1][0][1] * x[1][1][1])).reduceByKey(lambda a, b: a + b)
