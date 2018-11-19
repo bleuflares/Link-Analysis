@@ -39,7 +39,7 @@ if __name__ == "__main__":
     h_pair = h.map(mapper)
     a_pair = None
 
-    for j in range(20):
+    for j in range(50):
         h_matmul_pair = link.join(h_pair) #get pairs to multiply
         h_matmul = h_matmul_pair.map(lambda x: (x[1][0][0], x[1][0][1] * x[1][1][1])).reduceByKey(lambda a, b: a + b)  #matrix multiplication
         h_max_val = h_matmul.max(key= lambda x: x[1])
@@ -49,11 +49,6 @@ if __name__ == "__main__":
         a_matmul = a_matmul_pair.map(lambda x: (x[1][0][0], x[1][0][1] * x[1][1][1])).reduceByKey(lambda a, b: a + b)  #matrix multiplication
         a_max_val = a_matmul.max(key= lambda x: x[1])
         h_pair = a_matmul.map(a_normalize) #normalize vector
-
-    h_matmul_pair = link.join(h_pair) #get pairs to multiply
-    h_matmul = h_matmul_pair.map(lambda x: (x[1][0][0], x[1][0][1] * x[1][1][1])).reduceByKey(lambda a, b: a + b)  #matrix multiplication
-    h_max_val = h_matmul.max(key= lambda x: x[1])
-    a_pair = h_matmul.map(h_normalize) #normalize vector
 
     h_top_10 = sorted(h_pair.collect(), key=lambda x: -x[1][1])[:10] #get top 10
     a_top_10 = sorted(a_pair.collect(), key=lambda x: -x[1][1])[:10] #get top 10
