@@ -1,6 +1,7 @@
 import sys
 from pyspark import SparkConf, SparkContext
 
+#max value to store
 h_max_val = 0.0
 a_max_val = 0.0
 
@@ -9,19 +10,19 @@ def parser(line):
     points = line.split()
     if len(points) > 1:
         return (int(points[0]), (int(points[1]), 1.0))
-
+#mapper for parsing input for transposed matrix
 def parser_t(line):
     points = line.split()
     if len(points) > 1:
         return (int(points[1]), (int(points[0]), 1.0))
 
-#mapper for changing formation of rdd
+#mapper for changing formation of rdd to compute matrix multiplication
 def mapper(element):
     return (element[0], (element[1], element[2]))
-
+#normalize by making the maximum 1
 def h_normalize(vector):
     return (vector[0], (0, vector[1] / h_max_val[1]))
-
+#normalize by making the maximum 1
 def a_normalize(vector):
     return (vector[0], (0, vector[1] / a_max_val[1]))
 
@@ -52,11 +53,9 @@ if __name__ == "__main__":
 
     h_top_10 = sorted(h_pair.collect(), key=lambda x: -x[1][1])[:10] #get top 10
     a_top_10 = sorted(a_pair.collect(), key=lambda x: -x[1][1])[:10] #get top 10
-    print("h")
+
     for pair in h_top_10:
         print("%d\t%f" %(pair[0], pair[1][1])) # print top 10
-
-    print("a")
     for pair in a_top_10:
         print("%d\t%f" %(pair[0], pair[1][1])) # print top 10
 

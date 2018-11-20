@@ -11,7 +11,7 @@ def parser(line):
 def normalize(element):
     return [(element[0], element[1][0], 1.0 / float(element[1][1]))]
 
-#mapper for changing formation of rdd
+#mapper for changing formation of rdd to compute matrix multiplication
 def mapper(element):
     return (element[0], (element[1], element[2]))
 
